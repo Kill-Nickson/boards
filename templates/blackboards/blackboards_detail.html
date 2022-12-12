@@ -1,0 +1,128 @@
+{% extends 'account/base.html' %}
+{% load static %}
+
+{% block title %}{{ blackboard.board_name }}{% endblock title %}
+
+{% block content %}
+
+<div class="float-right">
+    <h5 class="card-header info-color white-text text-center py-2">
+    <strong>Add tasks' group</strong>
+    </h5>
+    <div class="card-body px-lg-5 pt-1">
+        <form class="text-center waves-effect z-depth-0" id="createGroupForm"
+              data-url="{% url 'blackboard_detail' blackboard.pk %}" method="post">
+            {% csrf_token %}
+             <div class="form-row">
+                <div class="col">
+                    <div class="md-form">
+                        <label>Group name</label>
+                        {{ form2.table_name }}
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-outline-info btn-rounded btn-block waves-effect z-depth-0 mt-2"
+                    id="createGroupButton" type="submit" name="group-btn">Add group</button>
+        </form>
+    </div>
+    <h5 class="card-header info-color white-text text-center py-2">
+    <strong>Add task</strong>
+    </h5>
+    <div class="card-body px-lg-5 pt-1 ">
+        <form class="text-center waves-effect z-depth-0" id="createTaskForm"
+              data-url="{% url 'blackboard_detail' blackboard.pk %}" method="post">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="col">
+                    <div class="md-form">
+                        <label>Group name</label>
+                        <select name="table" class="form-control" id="table">
+                            {% for table in blackboard.listtables.all %}
+                                <option value="{{table.table_name}}">{{table.table_name}}</option>
+                            {% endfor %}
+                        </select>
+                        <!--{{form.table}}-->
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col">
+                    <div class="md-form">
+                        <label>Task</label>
+                        {{ form.item_name }}
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-outline-info btn-rounded btn-block waves-effect z-depth-0 mt-2"
+                    id="createTaskButton" type="submit" name="task-btn">Add task</button>
+        </form>
+    </div>
+
+    <form method="POST" id="updateTableItemForm" data-url="{% url 'blackboard_detail' blackboard.pk %}">
+        {% csrf_token %}
+        <input type="hidden" id="update_table_id" value="{{ table.pk }}">
+        <input type="hidden" id="update_item_name" value="{{ item.item_name }}">
+        <input type="hidden" id="update_item_name_pk" value="{{ item.pk }}">
+    </form>
+</div>
+<!---->
+<div class="book-detail">
+    <h3>{{ blackboard.board_name }}</h3>
+    <p>Owner: {{ blackboard.owner }}</p>
+    <p>Password: {{ blackboard.password }}</p>
+</div>
+
+<div class="container-fluid pl-2 pr-2 text-center">
+    <div class="row" id="groupList">
+        {% for table in blackboard.listtables.all %}
+            <div class="card text-white bg-primary ml-3 mb-3 mr-3 col-lg-3" >
+                <div class="col-md-24">
+                    <div class="card-header text-center">
+                        <form method="POST" class="deleteTable">
+                            {{table.table_name}}
+                            {% csrf_token %}
+                            <input type="hidden" name="delete_table_name" value="{{ table.table_name }}">
+                            <input type="hidden" name="delete_table_name_pk" value="{{ table.pk }}">
+                            <button class="close-btn float-right" type="submit" name="remove-item-btn">
+                                <img class="close-btn" src="{% static 'images/close-btn.png' %}">
+                            </button>
+                        </form>
+                    </div>
+                    {% for item in table.listtableitems.all %}
+                    <ul class="list-group list-group-horizontal card-body ">
+
+                        <li class="list-group-item px-1 py-1 mr-0 checkArea" style="width:100%;">
+
+                            <input type="hidden" name="update_table_id" value="{{ table.pk }}">
+                            <input type="hidden" name="update_item_name" value="{{ item.item_name }}">
+                            <input type="hidden" name="update_item_name_pk" value="{{ item.pk }}">
+
+                            {% if item.completed == True %}
+                                <svg class="svg-line" style='width: 100%; height: 100%; z-index: 0;'>
+                                    <line x1="0" y1="100%" x2="100%" y2="0" style="stroke:rgb(0,0,0);stroke-width:2;stroke:#808080	;"></line>
+                                    <line x1="0" y1="0" x2="100%" y2="100%" style="stroke:rgb(0,0,0);stroke-width:2;stroke:#808080	;"></line>
+                                </svg>
+                            {% endif %}
+
+                            <div class="group-item">{{item.item_name}}</div>
+                        </li>
+                        <li>
+                            <form method="POST" class="deleteTableItem pl-2">
+                                {% csrf_token %}
+                                <input type="hidden" name="delete_table_id" value="{{ table.pk }}">
+                                <input type="hidden" name="delete_item_name" value="{{ item.item_name }}">
+                                <input type="hidden" name="delete_item_name_pk" value="{{ item.pk }}">
+                                <button class="close-btn float-right" type="submit" name="remove-item-btn">
+                                <img class="close-btn" src="{% static 'images/close-btn.png' %}">
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock content %}
