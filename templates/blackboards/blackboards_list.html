@@ -1,0 +1,55 @@
+{% extends 'account/base.html' %}
+
+{% block title %}Blackboards{% endblock title %}
+
+{% block content %}
+    <h3>Blackboards</h3><br/>
+    {% for blackboard in blackboard_list %}
+        <div>
+            <h4>
+                {{ blackboard.board_name }}
+                <button type="button" id="connectButton" class="btn btn-primary float-right" data-toggle="modal"
+                        data-target="#exampleModalCenter" value="{{ blackboard.board_name }}"
+                        onclick="setFormValues(this.value)" style="width: 200px;">Connect</button>
+            </h4>
+            <hr align="center" color="#ffffff" />
+        </div>
+    {% endfor %}
+
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+            <button type="button" onclick="setTipHidden()" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form method="POST" class="post-form " id="confirmPasswordForm">
+            {% csrf_token %}
+            <h6>Password:</h6>
+            <input type="hidden" name="board_name" ><!--value="{{ blackboard.board_name }}"-->
+            <input type="password" class="form-control" style="width=50%;" name="password">
+            <small id='error-message' class="error-message"></small>
+            <br/>
+            <button type="submit" class="btn btn-outline-success mt-2">Connect</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<script>
+    function setFormValues(val){
+        document.getElementById('exampleModalLongTitle').innerText = val;
+        document.querySelector('[name="board_name"]').value = val;
+    };
+
+    function setTipHidden(){
+        document.querySelector('[name="password"]').value = '';
+        document.getElementById('error-message').style.visibility = 'hidden';
+    };
+</script>
+
+{% endblock content %}

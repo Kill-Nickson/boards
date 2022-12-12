@@ -49,36 +49,36 @@ class BlackboardDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(BlackboardDetailView, self).get_context_data(**kwargs)
-        context['form'] = TableItemForm
-        context['form2'] = TableForm
+        context['table_item_form'] = TableItemForm
+        context['table_form'] = TableForm
         return context
 
     def post(self, request, **kwargs):
-        form = TableItemForm(request.POST)
-        form2 = TableForm(request.POST)
+        table_item_form = TableItemForm(request.POST)
+        table_form = TableForm(request.POST)
 
-        if 'item_name' in request.POST and form.is_valid():
-            if form.is_valid():
-                new_task = form.save(commit=False)
-                new_task.table = ListTable.objects.get(table_name=request.POST['table'])
-                new_task.item_name = form.cleaned_data['item_name']
-                form.save()
+        if 'item_name' in request.POST:
+            if table_item_form.is_valid():
+                new_task = table_item_form.save(commit=False)
+                new_task.table = ListTable.objects.get(board=self.get_object(), table_name=request.POST['table'])
+                new_task.item_name = table_item_form.cleaned_data['item_name']
+                table_item_form.save()
                 return HttpResponse('')
             else:
-                response = form.errors
+                response = table_item_form.errors
                 response = response.as_json()
                 return HttpResponse(json.dumps(response, ensure_ascii=False),
                                     content_type='application/json')
 
         elif 'table_name' in request.POST:
-            if form2.is_valid():
-                new_group = form2.save(commit=False)
+            if table_form.is_valid():
+                new_group = table_form.save(commit=False)
                 new_group.board = self.get_object()
-                new_group.table_name = form2.cleaned_data['table_name']
-                form2.save()
+                new_group.table_name = table_form.cleaned_data['table_name']
+                table_form.save()
                 return HttpResponse('')
             else:
-                response = form2.errors
+                response = table_form.errors
                 response = response.as_json()
                 return HttpResponse(json.dumps(response, ensure_ascii=False),
                                     content_type='application/json')
