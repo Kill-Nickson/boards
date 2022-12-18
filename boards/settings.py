@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'django_db_signals',
 
     # Local
     'users.apps.UsersConfig',

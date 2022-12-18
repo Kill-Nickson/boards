@@ -1,5 +1,6 @@
 import json
 
+from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic import ListView, DetailView
@@ -30,6 +31,8 @@ class BlackboardListView(ListView):
                 print('No such a board!')
             else:
                 if form_password == board.password:
+                    board.users.add(request.user)
+                    board.save()
                     pk = board.pk
                     url = reverse('blackboard_detail', kwargs={'pk': pk})
                     return HttpResponse(json.dumps(url, ensure_ascii=False),
@@ -52,6 +55,12 @@ class BlackboardDetailView(DetailView):
         context['table_item_form'] = TableItemForm
         context['table_form'] = TableForm
         return context
+
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated and \
+                (request.user == self.get_object().owner or request.user in self.get_object().users.all()):
+            return super(BlackboardDetailView, self).get(request, *args, **kwargs)
+        return HttpResponse(status=403)
 
     def post(self, request, **kwargs):
         table_item_form = TableItemForm(request.POST)
