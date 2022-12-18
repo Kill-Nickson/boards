@@ -21,3 +21,4 @@ six==1.15.0
 sqlparse==0.4.1
 urllib3==1.25.10
 python-dotenv==0.21.0
+django-db-signals==0.1.1

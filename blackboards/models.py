@@ -18,6 +18,7 @@ class Board(models.Model):
         get_user_model(),
         on_delete=models.CASCADE,
     )
+    users = models.ManyToManyField(get_user_model(), related_name="board_users", blank=True)
     password = models.CharField(max_length=50, blank=False)
 
     objects = Manager()
