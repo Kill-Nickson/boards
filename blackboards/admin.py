@@ -23,6 +23,7 @@ class BoardAdmin(admin.ModelAdmin):
         ListTableInline,
     ]
     list_display = ('board_name', 'owner', 'password')
+    filter_horizontal = ('users',)
 
 
 admin.site.register(ListTable, ListTableInline2)
