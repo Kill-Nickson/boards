@@ -1,6 +1,6 @@
 import json
 
-from django.core.exceptions import PermissionDenied
+from django.db.models import Q
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic import ListView, DetailView
@@ -14,6 +14,17 @@ class BlackboardListView(ListView):
     context_object_name = 'blackboard_list'
     template_name = 'blackboards/blackboards_list.html'
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        saved_boards = queryset.filter(Q(users=self.request.user) | Q(owner=self.request.owner))
+        available_boards = queryset.difference(saved_boards)
+        queryset = {
+            "saved_boards": saved_boards,
+            "available_boards": available_boards
+        }
+        return queryset
+
     def get_context_data(self, **kwargs):
         context = super(BlackboardListView, self).get_context_data(**kwargs)
         context['form'] = BoardForm
@@ -21,7 +32,6 @@ class BlackboardListView(ListView):
 
     def post(self, request, **kwargs):
         form = BoardForm(request.POST)
-
         if 'board_name' in request.POST and form.is_valid():
             board_name = request.POST['board_name']
             form_password = form.cleaned_data['password']
