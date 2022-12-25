@@ -3,8 +3,22 @@
 {% block title %}Blackboards{% endblock title %}
 
 {% block content %}
-    <h3>Blackboards</h3><br/>
-    {% for blackboard in blackboard_list %}
+    <h3>Saved blackboards</h3><br/>
+    {% for blackboard in blackboard_list.saved_boards %}
+        <div>
+            <h4>
+                {{ blackboard.board_name }}
+                <a href="{% url 'blackboard_detail' pk=blackboard.pk %}"
+                    class="btn btn-primary float-right" style="width: 200px;">
+                    Enter
+                </a>
+            </h4>
+            <hr align="center" color="#ffffff" />
+        </div>
+    {% endfor %}
+
+    <h3>Available blackboards</h3><br/>
+    {% for blackboard in blackboard_list.available_boards %}
         <div>
             <h4>
                 {{ blackboard.board_name }}
