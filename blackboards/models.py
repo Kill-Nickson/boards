@@ -5,6 +5,8 @@ from django.db import models
 from django.db.models import Manager
 from django.urls import reverse
 
+from users.models import MyUser
+
 
 class Board(models.Model):
 
@@ -18,7 +20,7 @@ class Board(models.Model):
         get_user_model(),
         on_delete=models.CASCADE,
     )
-    users = models.ManyToManyField(get_user_model(), related_name="board_users", blank=True)
+    users = models.ManyToManyField(get_user_model(), related_name="board_users", blank=True, through='BoardUser')
     password = models.CharField(max_length=50, blank=False)
 
     objects = Manager()
@@ -28,6 +30,17 @@ class Board(models.Model):
 
     def get_absolute_url(self):
         return reverse('blackboard_detail', kwargs={'pk': str(self.pk)})
+
+
+class BoardUser(models.Model):
+    ROLE_CHOICES = [
+        ('Visitor', 'Visitor'),
+        ('Member', 'Member'),
+        ('Admin', 'Admin'),
+    ]
+    board = models.ForeignKey(Board, on_delete=models.CASCADE, db_column='board_id')
+    user = models.ForeignKey(MyUser, on_delete=models.CASCADE, db_column='myuser_id')
+    role = models.CharField(max_length=256, default=ROLE_CHOICES[0][0], choices=ROLE_CHOICES)
 
 
 class ListTable(models.Model):

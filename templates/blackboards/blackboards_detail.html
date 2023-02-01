@@ -5,7 +5,8 @@
 
 {% block content %}
 
-<div class="float-right">
+{% if can_edit %}
+    <div class="float-right">
     <h5 class="card-header info-color white-text text-center py-2">
     <strong>Add tasks' group</strong>
     </h5>
@@ -65,15 +66,18 @@
         <input type="hidden" id="update_item_name_pk" value="{{ item.pk }}">
     </form>
 </div>
-<!---->
+{% endif %}
+
 <div class="book-detail">
     <h3>{{ blackboard.board_name }}</h3>
     <p>Owner: {{ blackboard.owner }}</p>
     <p>Password: {{ blackboard.password }}</p>
     {% for user in blackboard.users.all %}
     <p>Users: {{ user }}</p>
+    {% if blackboard.owner != user and user_role %}
+        <p>Your role: {{ user_role }}</p>
+    {%endif%}
     {% endfor %}
-
 </div>
 
 <div class="container-fluid pl-2 pr-2 text-center">
@@ -87,9 +91,11 @@
                             {% csrf_token %}
                             <input type="hidden" name="delete_table_name" value="{{ table.table_name }}">
                             <input type="hidden" name="delete_table_name_pk" value="{{ table.pk }}">
-                            <button class="close-btn float-right" type="submit" name="remove-item-btn">
-                                <img class="close-btn" src="{% static 'images/close-btn.png' %}">
-                            </button>
+                            {% if can_edit %}
+                                <button class="close-btn float-right" type="submit" name="remove-item-btn">
+                                    <img class="close-btn" src="{% static 'images/close-btn.png' %}">
+                                </button>
+                            {% endif %}
                         </form>
                     </div>
                     {% for item in table.listtableitems.all %}
@@ -116,9 +122,11 @@
                                 <input type="hidden" name="delete_table_id" value="{{ table.pk }}">
                                 <input type="hidden" name="delete_item_name" value="{{ item.item_name }}">
                                 <input type="hidden" name="delete_item_name_pk" value="{{ item.pk }}">
-                                <button class="close-btn float-right" type="submit" name="remove-item-btn">
-                                <img class="close-btn" src="{% static 'images/close-btn.png' %}">
-                                </button>
+                                {% if can_edit %}
+                                    <button class="close-btn float-right" type="submit" name="remove-item-btn">
+                                        <img class="close-btn" src="{% static 'images/close-btn.png' %}">
+                                    </button>
+                                {% endif %}
                             </form>
                         </li>
                     </ul>

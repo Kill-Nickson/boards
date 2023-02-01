@@ -1,10 +1,14 @@
 from django.contrib import admin
 
-from .models import Board, ListTable, ListTableItem
+from .models import Board, ListTable, ListTableItem, BoardUser
 
 
 class ListTableItemInline(admin.TabularInline):
     model = ListTableItem
+
+
+class BoardUsersInLine(admin.StackedInline):
+    model = BoardUser
 
 
 class ListTableInline2(admin.ModelAdmin):
@@ -21,6 +25,7 @@ class ListTableInline(admin.TabularInline):
 class BoardAdmin(admin.ModelAdmin):
     inlines = [
         ListTableInline,
+        BoardUsersInLine,
     ]
     list_display = ('board_name', 'owner', 'password')
     filter_horizontal = ('users',)

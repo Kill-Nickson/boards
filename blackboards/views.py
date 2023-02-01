@@ -5,7 +5,7 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic import ListView, DetailView
 
-from .models import Board, ListTable, ListTableItem
+from .models import Board, ListTable, ListTableItem, BoardUser
 from .forms import TableItemForm, TableForm, BoardForm
 
 
@@ -17,7 +17,7 @@ class BlackboardListView(ListView):
     def get_queryset(self):
         queryset = super().get_queryset()
 
-        saved_boards = queryset.filter(Q(users=self.request.user) | Q(owner=self.request.owner))
+        saved_boards = queryset.filter(Q(users=self.request.user) | Q(owner=self.request.user))
         available_boards = queryset.difference(saved_boards)
         queryset = {
             "saved_boards": saved_boards,
@@ -64,6 +64,18 @@ class BlackboardDetailView(DetailView):
         context = super(BlackboardDetailView, self).get_context_data(**kwargs)
         context['table_item_form'] = TableItemForm
         context['table_form'] = TableForm
+        board_user = BoardUser.objects.filter(
+            Q(board=self.get_object()),
+            Q(user=self.request.user)
+        )
+
+        if board_user.exists():
+            role = board_user.first().role
+            can_edit = role != 'Visitor'
+            context['user_role'] = role
+        else:
+            can_edit = self.get_object().owner == self.request.user
+        context['can_edit'] = can_edit
         return context
 
     def get(self, request, *args, **kwargs):
@@ -73,6 +85,17 @@ class BlackboardDetailView(DetailView):
         return HttpResponse(status=403)
 
     def post(self, request, **kwargs):
+        if not (request.user.is_authenticated and
+                (request.user == self.get_object().owner or request.user in self.get_object().users.all())):
+            return HttpResponse(status=403)
+
+        board_users = BoardUser.objects.filter(
+            Q(board=self.get_object()),
+            Q(user=request.user)
+        )
+        if board_users.exists() and board_users.first().role == 'Visitor':
+            return HttpResponse(status=403)
+
         table_item_form = TableItemForm(request.POST)
         table_form = TableForm(request.POST)
 
@@ -90,12 +113,15 @@ class BlackboardDetailView(DetailView):
                                     content_type='application/json')
 
         elif 'table_name' in request.POST:
+
             if table_form.is_valid():
+
                 new_group = table_form.save(commit=False)
                 new_group.board = self.get_object()
                 new_group.table_name = table_form.cleaned_data['table_name']
                 table_form.save()
                 return HttpResponse('')
+
             else:
                 response = table_form.errors
                 response = response.as_json()
